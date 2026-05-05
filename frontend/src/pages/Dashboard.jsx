@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
 import api, { absUrl } from "@/lib/api";
 import { Upload, History, BarChart3, Shield, TrendingUp, Flag } from "lucide-react";
+import SignalCard from "@/components/SignalCard";
 
 const roleGreeting = {
   user: "Ready to contribute your view of the city?",
@@ -53,6 +54,26 @@ export default function Dashboard() {
           <StatCard label="Flagged" value={stats?.flagged ?? "—"} Icon={Flag} color="var(--yellow)" />
           <StatCard label="Role" value={user?.role?.toUpperCase() || "USER"} Icon={user?.role === "police" ? Shield : BarChart3} color="var(--accent)" />
         </div>
+
+        {/* Latest decision */}
+        {recent[0]?.signal && (
+          <div className="mb-10 grid grid-cols-1 lg:grid-cols-3 gap-6" data-testid="dashboard-latest-decision">
+            <div className="lg:col-span-2 ce-card overflow-hidden">
+              <Link to={`/analysis/${recent[0].id}`} className="block">
+                <div className="aspect-video bg-black">
+                  <img src={absUrl(recent[0].annotated_url)} alt="latest scene" className="w-full h-full object-cover" />
+                </div>
+                <div className="p-4 flex items-center justify-between border-t border-white/10">
+                  <div className="font-mono text-xs uppercase tracking-wider text-[color:var(--text-muted)]">
+                    Latest Scene · {new Date(recent[0].created_at).toLocaleString()}
+                  </div>
+                  <div className="font-mono text-xs text-[color:var(--accent)] hover:underline">View detail →</div>
+                </div>
+              </Link>
+            </div>
+            <SignalCard signal={recent[0].signal} />
+          </div>
+        )}
 
         {/* Recent */}
         <div className="flex items-end justify-between mb-4">
