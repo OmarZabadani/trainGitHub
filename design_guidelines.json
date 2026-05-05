@@ -1,0 +1,175 @@
+{
+  "project_name": "City Eye",
+  "theme": "dark",
+  "archetype": "Archetype 4 (Swiss & High-Contrast) + Tactical Control Room Twist",
+  "design_philosophy": "Smart City Command Center. High-contrast visibility, dense data visualization via Bento grids, zero decorative fluff. Use color strictly to convey traffic status and warnings.",
+  
+  "colors": {
+    "background": {
+      "default": "#05060A",
+      "surface": "#12131A",
+      "surface_hover": "#1C1D26",
+      "glass": "rgba(18, 19, 26, 0.7)"
+    },
+    "text": {
+      "primary": "#F8F9FA",
+      "secondary": "#A1A1AA",
+      "muted": "#71717A",
+      "inverse": "#05060A"
+    },
+    "border": {
+      "default": "rgba(255, 255, 255, 0.08)",
+      "focus": "rgba(0, 229, 255, 0.4)",
+      "active": "rgba(255, 255, 255, 0.2)"
+    },
+    "accents": {
+      "primary": "#00E5FF",
+      "primary_hover": "#00C3D9",
+      "primary_glow": "rgba(0, 229, 255, 0.2)",
+      "brand_secondary": "#FFFFFF"
+    },
+    "signals": {
+      "green": "#06D6A0",
+      "green_glow": "rgba(6, 214, 160, 0.15)",
+      "yellow": "#FFBA08",
+      "yellow_glow": "rgba(255, 186, 8, 0.15)",
+      "red": "#FF3B30",
+      "red_glow": "rgba(255, 59, 48, 0.15)",
+      "blue": "#3B82F6"
+    }
+  },
+  
+  "typography": {
+    "font_families": {
+      "heading": "Cabinet Grotesk, sans-serif",
+      "body": "Manrope, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scales": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter leading-none",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-medium tracking-tight",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed text-secondary",
+      "body_small": "text-sm text-secondary",
+      "data_large": "text-4xl sm:text-5xl font-mono tracking-tight",
+      "label": "text-xs font-mono uppercase tracking-[0.1em] text-muted"
+    }
+  },
+  
+  "spacing_and_layout": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "section_padding": "py-20 sm:py-32",
+    "grid_gap": "gap-6 lg:gap-8",
+    "bento_spacing": "p-6 sm:p-8",
+    "bento_grid": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+    "radius": {
+      "sm": "rounded-sm",
+      "md": "rounded-md",
+      "lg": "rounded-lg",
+      "xl": "rounded-xl"
+    },
+    "surfaces": {
+      "card": "bg-surface border border-white/10 rounded-xl overflow-hidden shadow-sm",
+      "glass_header": "bg-surface/70 backdrop-blur-xl border-b border-white/10"
+    }
+  },
+  
+  "motion_and_interactions": {
+    "hover_lift": "transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]",
+    "button_hover": "transition-colors duration-200",
+    "row_hover": "hover:bg-white/[0.02] transition-colors cursor-pointer",
+    "status_pulse": "animate-pulse"
+  },
+  
+  "components": {
+    "buttons": {
+      "primary": "inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-inverse bg-primary hover:bg-primary_hover transition-colors rounded-md",
+      "secondary": "inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-primary bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 transition-colors rounded-md",
+      "danger": "inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white bg-signals-red hover:bg-red-600 transition-colors rounded-md"
+    },
+    "badges": {
+      "base": "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium",
+      "high_density": "bg-red-500/10 text-signals-red border border-red-500/20",
+      "medium_density": "bg-yellow-500/10 text-signals-yellow border border-yellow-500/20",
+      "low_density": "bg-green-500/10 text-signals-green border border-green-500/20",
+      "neutral": "bg-white/5 text-secondary border border-white/10"
+    },
+    "inputs": {
+      "text": "flex h-12 w-full rounded-md border border-white/10 bg-surface/50 px-3 py-2 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all",
+      "upload_area": "flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-white/20 rounded-xl bg-surface hover:bg-white/5 hover:border-primary/50 transition-all cursor-pointer"
+    }
+  },
+  
+  "icons": {
+    "library": "lucide-react",
+    "style": "stroke-width 1.5, strict geometric alignment"
+  },
+  
+  "media": {
+    "hero_background": {
+      "url": "https://images.unsplash.com/photo-1764432340198-c997e41fd8c7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMHJhZGFyJTIwZGF0YSUyMGdyaWR8ZW58MHx8fHwxNzc3OTc4ODQyfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Abstract circular radar pattern representing data monitoring",
+      "usage": "Landing page hero section background (overlay with bg-black/70)"
+    },
+    "demo_traffic_night": {
+      "url": "https://images.unsplash.com/photo-1644600387032-3194025de722?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHw0fHxjaXR5JTIwaW50ZXJzZWN0aW9uJTIwbmlnaHQlMjBhZXJpYWx8ZW58MHx8fHwxNzc3OTc4ODM1fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Aerial view of city intersection at night",
+      "usage": "Example image in the history list or 'how it works' section"
+    },
+    "demo_traffic_day": {
+      "url": "https://images.unsplash.com/photo-1776950174978-1db87a7d77c5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjh8MHwxfHNlYXJjaHwxfHx0cmFmZmljJTIwY2FtZXJhJTIwdmlldyUyMGNhcnN8ZW58MHx8fHwxNzc3OTc4ODM1fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Street view traffic camera style",
+      "usage": "Mock AI detection results background image"
+    },
+    "avatar_police": {
+      "url": "https://images.pexels.com/photos/7714669/pexels-photo-7714669.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Police officer portrait",
+      "usage": "Dashboard profile avatar for Police Officer role"
+    }
+  },
+  
+  "page_blueprints": {
+    "landing": {
+      "structure": "Hero (Nav + Headline + CTA + BG image) -> Features (Bento Grid) -> How it Works (Steps) -> Footer",
+      "notes": "Hero must have stark contrast. Headline text-6xl, neon cyan accent on keywords. Background must have a black overlay to ensure readability."
+    },
+    "auth": {
+      "structure": "Split screen. Left: Branding/Image, Right: Login/Register form with Role selection toggle (User, Police, Analyzer).",
+      "notes": "Role selector should be visual cards with icons, not just a dropdown."
+    },
+    "dashboard_layout": {
+      "structure": "Top Nav (Logo, Role Badge, Avatar) -> Main Content Area (Sidebar optional, Top metrics row, Main content grid)",
+      "notes": "Top Nav must be sticky Glassmorphism (bg-surface/70 blur)."
+    },
+    "upload_panel": {
+      "structure": "Card -> Dashed Upload Area -> File Info -> Analyze Button",
+      "notes": "On successful upload, transition seamlessly to Detection Results view."
+    },
+    "detection_results": {
+      "structure": "Grid Layout. Left Column (span-2): Annotated Image view. Right Column (span-1): Density Meter, Vehicle Counts list, Signal Recommendation card.",
+      "notes": "Bounding boxes over image should use neon colors (cyan, magenta, yellow). Signal recommendation card must clearly display Red/Yellow/Green phases using the 'signals' color palette."
+    }
+  },
+  
+  "testing_attributes": {
+    "rules": "All interactive elements MUST have data-testid. Use kebab-case, role-based naming.",
+    "examples": [
+      "data-testid='login-submit-button'",
+      "data-testid='role-selector-police'",
+      "data-testid='upload-dropzone'",
+      "data-testid='analyze-traffic-button'",
+      "data-testid='density-meter-badge'"
+    ]
+  },
+  
+  "instructions_to_main_agent": [
+    "Strictly follow the color palette provided. Do not invent new gradients.",
+    "Use Cabinet Grotesk for headings and JetBrains Mono for all numeric data and labels. Import these from Google Fonts/Fontshare.",
+    "Wrap grid items correctly to avoid layout breakage on mobile.",
+    "Use Lucide-React for all icons, keeping stroke width consistent.",
+    "For the bounding box AI overlay, use absolutely positioned divs over the demo image with thin neon borders (border-primary).",
+    "Include 'data-testid' on every button, link, and input as per the guidelines.",
+    "Ensure the Signal Recommendation Card uses actual glowing colors from the 'signals' object (e.g. shadow-[0_0_15px_rgba(6,214,160,0.5)] for a green signal)."
+  ]
+}
