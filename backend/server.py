@@ -127,6 +127,11 @@ class UserOut(BaseModel):
     role: str
     created_at: str
 
+class AuthOut(BaseModel):
+    user: UserOut
+    access_token: str
+    refresh_token: str
+
 class VehicleCounts(BaseModel):
     car: int = 0
     bus: int = 0
@@ -139,6 +144,11 @@ class SignalRecommendation(BaseModel):
     phase: Literal["green", "yellow", "red"]
     duration_seconds: int
     reason: str
+    cross_street_phase: Literal["green", "yellow", "red"] = "red"
+    cross_street_duration: int = 30
+    priority: Literal["low", "normal", "high", "critical"] = "normal"
+    weighted_load: float = 0.0
+    action: str = ""
 
 class AnalysisOut(BaseModel):
     id: str
@@ -230,12 +240,73 @@ def classify_density(total: int) -> tuple[str, float]:
         return "medium", score
     return "high", score
 
-def recommend_signal(density: str, total: int) -> SignalRecommendation:
-    if density == "high":
-        return SignalRecommendation(phase="green", duration_seconds=45, reason=f"High congestion ({total} vehicles). Extend green to clear queue.")
-    if density == "medium":
-        return SignalRecommendation(phase="green", duration_seconds=30, reason=f"Moderate flow ({total} vehicles). Standard green phase.")
-    return SignalRecommendation(phase="yellow", duration_seconds=15, reason=f"Low traffic ({total} vehicles). Prioritize cross-street green.")
+# Vehicle weights — heavy/long vehicles add more clearance time than cars
+VEHICLE_WEIGHTS = {
+    "bus": 2.5,
+    "truck": 2.5,
+    "car": 1.0,
+    "motorcycle": 0.5,
+    "bicycle": 0.3,
+}
+
+def recommend_signal(density: str, total: int, counts: dict | None = None) -> SignalRecommendation:
+    """Decide approach phase + cross-street phase based on weighted vehicle load.
+
+    Logic:
+      - Compute a weighted load using vehicle-type weights.
+      - Heavy traffic -> long GREEN for approach, RED for cross-street.
+      - Moderate     -> standard GREEN/RED cycle.
+      - Light        -> short GREEN (or YELLOW) for approach, give priority to cross-street.
+      - If a heavy-vehicle ratio is high, mark priority=high (longer clearance).
+    """
+    counts = counts or {}
+    weighted = 0.0
+    for cls, w in VEHICLE_WEIGHTS.items():
+        weighted += counts.get(cls, 0) * w
+    weighted = round(weighted, 2)
+
+    heavy = counts.get("bus", 0) + counts.get("truck", 0)
+    heavy_ratio = (heavy / total) if total else 0
+
+    if weighted >= 25 or density == "high":
+        phase = "green"
+        duration = 50 if heavy_ratio >= 0.25 else 45
+        cross = "red"
+        cross_duration = duration
+        priority = "critical" if weighted >= 40 else "high"
+        action = "EXTEND GREEN — Clear queue"
+        reason = (
+            f"Heavy congestion detected (load={weighted}, {total} vehicles). "
+            f"{'Significant heavy-vehicle presence requires extra clearance time.' if heavy_ratio >= 0.25 else 'Extend green phase to dissipate the queue.'}"
+        )
+    elif weighted >= 8 or density == "medium":
+        phase = "green"
+        duration = 30
+        cross = "red"
+        cross_duration = 30
+        priority = "normal"
+        action = "STANDARD CYCLE — Normal flow"
+        reason = f"Moderate flow (load={weighted}, {total} vehicles). Apply standard green-phase timing."
+    else:
+        # Low traffic on this approach — favor cross-street.
+        phase = "yellow" if total >= 1 else "red"
+        duration = 12 if total >= 1 else 5
+        cross = "green"
+        cross_duration = 35
+        priority = "low"
+        action = "YIELD — Prioritize cross-street"
+        reason = f"Light approach traffic (load={weighted}, {total} vehicles). Give the green to the cross-street."
+
+    return SignalRecommendation(
+        phase=phase,
+        duration_seconds=duration,
+        reason=reason,
+        cross_street_phase=cross,
+        cross_street_duration=cross_duration,
+        priority=priority,
+        weighted_load=weighted,
+        action=action,
+    )
 
 # ---------- App ----------
 app = FastAPI(title="City Eye API")
@@ -245,7 +316,7 @@ api = APIRouter(prefix="/api")
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 # ---------- Auth endpoints ----------
-@api.post("/auth/register", response_model=UserOut)
+@api.post("/auth/register", response_model=AuthOut)
 async def register(body: RegisterIn, response: Response):
     email = body.email.lower()
     if body.role not in VALID_ROLES:
@@ -263,17 +334,23 @@ async def register(body: RegisterIn, response: Response):
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.users.insert_one(doc)
-    set_auth_cookies(response, create_access_token(uid, email, body.role), create_refresh_token(uid))
-    return UserOut(id=uid, email=email, name=body.name, role=body.role, created_at=doc["created_at"])
+    access = create_access_token(uid, email, body.role)
+    refresh = create_refresh_token(uid)
+    set_auth_cookies(response, access, refresh)
+    user = UserOut(id=uid, email=email, name=body.name, role=body.role, created_at=doc["created_at"])
+    return AuthOut(user=user, access_token=access, refresh_token=refresh)
 
-@api.post("/auth/login", response_model=UserOut)
+@api.post("/auth/login", response_model=AuthOut)
 async def login(body: LoginIn, response: Response):
     email = body.email.lower()
     user = await db.users.find_one({"email": email})
     if not user or not verify_password(body.password, user["password_hash"]):
         raise HTTPException(401, "Invalid credentials")
-    set_auth_cookies(response, create_access_token(user["id"], email, user["role"]), create_refresh_token(user["id"]))
-    return UserOut(id=user["id"], email=user["email"], name=user["name"], role=user["role"], created_at=user["created_at"])
+    access = create_access_token(user["id"], email, user["role"])
+    refresh = create_refresh_token(user["id"])
+    set_auth_cookies(response, access, refresh)
+    out_user = UserOut(id=user["id"], email=user["email"], name=user["name"], role=user["role"], created_at=user["created_at"])
+    return AuthOut(user=out_user, access_token=access, refresh_token=refresh)
 
 @api.post("/auth/logout")
 async def logout(response: Response):
@@ -290,7 +367,7 @@ def _persist_analysis(user: dict, media_type: str, orig_name: str, annot_name: s
     counts_dict = detection["counts"]
     total = counts_dict["total"]
     density, density_score = classify_density(total)
-    signal = recommend_signal(density, total)
+    signal = recommend_signal(density, total, counts_dict)
 
     analysis_id = str(uuid.uuid4())
     now_iso = datetime.now(timezone.utc).isoformat()
